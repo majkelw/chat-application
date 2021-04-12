@@ -13,6 +13,7 @@ public class ServerThread extends Thread {
     private String username = null;
     private Room room;
 
+
     public ServerThread(DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
         this.dataInputStream = dataInputStream;
         this.dataOutputStream = dataOutputStream;
@@ -20,7 +21,8 @@ public class ServerThread extends Thread {
 
 
     private boolean createRoom(String username, String roomName) throws IOException {
-        ValidationInfo x = Server.validate(username, roomName, 1);
+        int createRoomValue = 1;
+        ValidationInfo x = Server.validate(username, roomName, createRoomValue);
         if (x == ValidationInfo.ROOM_EXISTS) {
             dataOutputStream.writeInt(ValidationInfo.ROOM_EXISTS.getValue());
             return false;
@@ -35,22 +37,17 @@ public class ServerThread extends Thread {
 
     private boolean joinRoom(String username, String roomName) throws IOException {
         ValidationInfo x = Server.validate(username, roomName, 2);
-        if (x == ValidationInfo.ROOM_DOES_NOT_EXIST) {
-            dataOutputStream.writeInt(ValidationInfo.ROOM_DOES_NOT_EXIST.getValue());
-            return false;
-        } else if (x == ValidationInfo.USER_EXISTS_IN_ROOM) {
-            dataOutputStream.writeInt(ValidationInfo.USER_EXISTS_IN_ROOM.getValue());
+        if (x == ValidationInfo.ROOM_DOES_NOT_EXIST || x == ValidationInfo.USER_EXISTS_IN_ROOM) {
+            dataOutputStream.writeInt(x.getValue());
             return false;
         } else if (x == ValidationInfo.SUCCESS) {
             this.username = username;
             room = Server.joinRoom(roomName, username, this.dataOutputStream);
             dataOutputStream.writeInt(ValidationInfo.SUCCESS.getValue());
-            room.sendMessageChat(username, " joined to the room", 2);
+            room.sendMessage(username, username + " joined to the room");
         }
-
         return true;
     }
-
 
 
     private void startConversation() throws IOException {
@@ -59,20 +56,20 @@ public class ServerThread extends Thread {
             String message = dataInputStream.readUTF();
             if (message.length() == 0)
                 continue;
-            if(message.equals("<-leave")){
-                room.sendMessageChat(username, " left the room",2);
+            if (message.equals("<-leave")) {
+                room.sendMessage(username, username + " left the room");
                 room.removeUser(username);
                 dataOutputStream.writeUTF("left");
                 flag = false;
             }
-            room.sendMessageChat(username, message, 1);
+            room.sendMessage(username, username + " : " + message);
         }
     }
 
     @Override
     public void run() {
         try {
-            while(true) {
+            while (true) {
                 boolean flag = true;
                 while (flag) {
                     int choice = dataInputStream.readInt();
@@ -85,13 +82,11 @@ public class ServerThread extends Thread {
                         if (joinRoom(username, roomName))
                             flag = false;
                 }
-
                 startConversation();
             }
         } catch (IOException e) {
             System.out.println("error");
             e.printStackTrace();
         }
-
     }
 }

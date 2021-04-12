@@ -16,13 +16,11 @@ public class ClientThread extends Thread {
             try {
                 String message = dataInputStream.readUTF();
                 System.out.println(message);
-                if(message.equals("left"))
+                if (message.equals("left"))
                     break;
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
     }
 }

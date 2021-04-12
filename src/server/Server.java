@@ -13,7 +13,6 @@ import java.util.Map;
 public class Server {
     private static final List<Room> rooms = new ArrayList<>();
 
-
     public static Room createRoom(String roomName, String username, DataOutputStream creator) {
         Room room = new Room(roomName, username, creator);
         rooms.add(room);
@@ -30,13 +29,15 @@ public class Server {
         return null;
     }
 
-    public static ValidationInfo validate(String username, String roomName, int option) {
 
-        if (option == 1) {//create new room
+    public static ValidationInfo validate(String username, String roomName, int option) {
+        int createRoomValue = 1, joinRoomValue = 2;
+
+        if (option == createRoomValue) {//create new room
             for (Room room : rooms)
                 if (room.getRoomName().equals(roomName))
                     return ValidationInfo.ROOM_EXISTS;
-        } else if (option == 2) {//join to the room
+        } else if (option == joinRoomValue) {//join to the room
             boolean flag = false;
             Room roomFound = null;
             for (Room room : rooms) {

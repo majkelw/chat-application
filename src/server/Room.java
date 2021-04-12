@@ -26,27 +26,18 @@ public class Room {
         usersMap.put(username, dataOutputStream);
     }
 
-    public void removeUser(String username){
+    public void removeUser(String username) {
         for (Map.Entry<String, DataOutputStream> entry : usersMap.entrySet()) {
             if (entry.getKey().equals(username))
                 usersMap.remove(username);
         }
     }
 
-    public void sendMessageChat(String username, String message, int operation) throws IOException {
-        String messageToSend;
-        if (operation == 1)
-            messageToSend = username + " : " + message;
-        else
-            messageToSend = username + message;
-
+    public void sendMessage(String username, String message) throws IOException {
         for (Map.Entry<String, DataOutputStream> entry : usersMap.entrySet()) {
             System.out.println(entry.getKey());
-            if (!entry.getKey().equals(username)) {
-                entry.getValue().writeUTF(messageToSend);
-            }
+            if (!entry.getKey().equals(username))
+                entry.getValue().writeUTF(message);
         }
     }
-
-
 }

@@ -24,8 +24,7 @@ public class Client {
 
     private int askToCreateRoom(String name, String roomName) throws IOException {
         sendUserRoomInfoToServer(name, roomName);
-        int x = dataInputStream.readInt();
-        return x;
+        return dataInputStream.readInt();
     }
 
     private int askToJoinRoom(String name, String roomName) throws IOException {
@@ -38,7 +37,7 @@ public class Client {
         while (true) {
             String message = scanner.nextLine();
             dataOutputStream.writeUTF(message);
-            if(message.equals("<-leave"))
+            if (message.equals("<-leave"))
                 break;
         }
     }
@@ -51,18 +50,16 @@ public class Client {
         while (flag) {
             System.out.println("Make your choice ");
             int x;
-            try{
+            try {
                 x = scanner.nextInt();
-                if(x!=1 && x!=2){
+                if (x != 1 && x != 2) {
                     System.out.println("Input must be digit 1 or 2");
                     continue;
                 }
-            }
-            catch(InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.out.println("Input must be digit 1 or 2");
                 continue;
-            }
-            finally {
+            } finally {
                 scanner.nextLine();
             }
 
@@ -73,11 +70,9 @@ public class Client {
             dataOutputStream.writeInt(x);
             if (x == 1) {
 
-                if (askToCreateRoom(name, roomName) == ValidationInfo.ROOM_EXISTS.getValue()){
+                if (askToCreateRoom(name, roomName) == ValidationInfo.ROOM_EXISTS.getValue()) {
                     System.out.printf("Room %s already exists...\n", roomName);
-                }
-
-                else {
+                } else {
                     System.out.printf("Welcome in %s\n", roomName);
                     flag = false;
                 }
@@ -103,8 +98,7 @@ public class Client {
         Client client = new Client(output, input);
 
 
-
-        while(true) {
+        while (true) {
             client.getUsernameAndRoomName();
             ClientThread clientThread = new ClientThread(input);
             clientThread.start();
