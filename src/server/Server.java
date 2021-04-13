@@ -1,8 +1,10 @@
 package server;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ public class Server {
             System.out.println("New connection from the client " + socket);
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            ServerThread serverThread = new ServerThread(dataInputStream, dataOutputStream);
+            ServerThread serverThread = new ServerThread(socket, dataInputStream, dataOutputStream);
             serverThread.start();
         }
     }
@@ -60,9 +62,12 @@ public class Server {
             ServerSocket serverSocket = new ServerSocket(60);
             System.out.println("Server has started working...");
             server.connectWithNewClients(serverSocket);
+        } catch (ConnectException e) {
+            System.out.println("ConnectException occurred");
+        } catch (SocketException e) {
+            System.out.println("Cannot create server");
         } catch (IOException e) {
-            System.out.println("IO Exception");
-            e.printStackTrace();
+            System.out.println("IOException occurred");
         }
     }
 }

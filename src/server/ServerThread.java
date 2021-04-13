@@ -3,16 +3,21 @@ package server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.net.SocketException;
 
 
 public class ServerThread extends Thread {
+    private final Socket socket;
     private final DataInputStream dataInputStream;
     private final DataOutputStream dataOutputStream;
     private String username = null;
     private Room room = null;
 
 
-    public ServerThread(DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
+    public ServerThread(Socket socket, DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
+        this.socket = socket;
         this.dataInputStream = dataInputStream;
         this.dataOutputStream = dataOutputStream;
     }
@@ -36,9 +41,10 @@ public class ServerThread extends Thread {
             return false;
         }
         room = Server.joinRoom(roomName, username, dataOutputStream);
-        if (room == null)
+        if (room == null) {
             dataOutputStream.writeUTF("This username is taken...");
-        else {
+            return false;
+        } else {
             this.username = username;
             dataOutputStream.writeUTF("Success");
             room.sendMessage(username, username + " joined to the room");
@@ -51,8 +57,6 @@ public class ServerThread extends Thread {
         boolean flag = true;
         while (flag) {
             String message = dataInputStream.readUTF();
-            if (message.length() == 0)
-                continue;
             if (message.equals("<-leave")) {
                 room.sendMessage(username, username + " left the room");
                 room.removeUser(username);
@@ -83,9 +87,19 @@ public class ServerThread extends Thread {
                 }
                 startConversation();
             }
+        } catch (ConnectException e) {
+            System.out.println("Connect exception occurred");
+        } catch (SocketException e) {
+            System.out.println("Connection with client lost " + socket);
         } catch (IOException e) {
-            System.out.println("error");
-            e.printStackTrace();
+            System.out.println("IOException occurred");
+        } finally {
+            try {
+                socket.close();
+                System.out.println("socket closed");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

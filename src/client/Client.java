@@ -1,7 +1,9 @@
 package client;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -9,6 +11,7 @@ public class Client {
 
     private final DataOutputStream dataOutputStream;
     private final DataInputStream dataInputStream;
+    private static final Scanner scanner = new Scanner(System.in);
 
     public Client(DataOutputStream dataOutputStream, DataInputStream dataInputStream) {
         this.dataOutputStream = dataOutputStream;
@@ -31,12 +34,12 @@ public class Client {
     }
 
     private void startConversation() throws IOException {
-        Scanner scanner = new Scanner(System.in);
         while (true) {
             String message = scanner.nextLine();
             dataOutputStream.writeUTF(message);
-            if (message.equals("<-leave"))
+            if (message.equals("<-leave")) {
                 break;
+            }
         }
     }
 
@@ -66,8 +69,8 @@ public class Client {
     private void getDataFromUserInput() throws IOException {
         System.out.println("Create a new room, type 1");
         System.out.println("Join to the room, type 2");
-        Scanner scanner = new Scanner(System.in);
         boolean flag = true;
+
         while (flag) {
             System.out.println("Make your choice ");
             int choice;
@@ -87,15 +90,16 @@ public class Client {
             String name = scanner.nextLine();
             System.out.println("Enter room name");
             String roomName = scanner.nextLine();
-            if (manageData(choice, name, roomName))
+            if (manageData(choice, name, roomName)) {
                 flag = false;
+            }
         }
     }
 
     public static void main(String[] args) {
-
+        Socket socket = null;
         try {
-            Socket socket = new Socket("localhost", 60);
+            socket = new Socket("localhost", 60);
             DataInputStream input = new DataInputStream(socket.getInputStream());
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
             Client client = new Client(output, input);
@@ -105,9 +109,20 @@ public class Client {
                 clientThread.start();
                 client.startConversation();
             }
+        } catch (ConnectException e) {
+            System.err.println("Connect exception occurred");
+        } catch (SocketException e) {
+            System.err.println("Lost connection with server");
         } catch (IOException e) {
-            System.out.println("IO Exception");
-            e.printStackTrace();
+            System.err.println("IOException occurred");
+        } finally {
+            scanner.close();
+            try {
+                assert socket != null;
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

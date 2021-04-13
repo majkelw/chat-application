@@ -19,7 +19,7 @@ public class ClientThread extends Thread {
                     break;
                 System.out.println(message);
             } catch (IOException e) {
-                e.printStackTrace();
+                break;
             }
         }
     }
