@@ -1,7 +1,5 @@
 package server;
 
-import enums.ValidationInfo;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,7 +9,7 @@ public class ServerThread extends Thread {
     private final DataInputStream dataInputStream;
     private final DataOutputStream dataOutputStream;
     private String username = null;
-    private Room room;
+    private Room room = null;
 
 
     public ServerThread(DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
@@ -21,29 +19,28 @@ public class ServerThread extends Thread {
 
 
     private boolean createRoom(String username, String roomName) throws IOException {
-        int createRoomValue = 1;
-        ValidationInfo x = Server.validate(username, roomName, createRoomValue);
-        if (x == ValidationInfo.ROOM_EXISTS) {
-            dataOutputStream.writeInt(ValidationInfo.ROOM_EXISTS.getValue());
+        room = Server.createRoom(roomName, username, dataOutputStream);
+        if (room == null) {
+            dataOutputStream.writeUTF("room exists");
             return false;
-        } else if (x == ValidationInfo.SUCCESS) {
-            this.username = username;
-            System.out.println(username + " to room " + roomName);
-            room = Server.createRoom(roomName, username, this.dataOutputStream);
-            dataOutputStream.writeInt(ValidationInfo.SUCCESS.getValue());
         }
+        this.username = username;
+        dataOutputStream.writeUTF("success");
         return true;
     }
 
     private boolean joinRoom(String username, String roomName) throws IOException {
-        ValidationInfo x = Server.validate(username, roomName, 2);
-        if (x == ValidationInfo.ROOM_DOES_NOT_EXIST || x == ValidationInfo.USER_EXISTS_IN_ROOM) {
-            dataOutputStream.writeInt(x.getValue());
+
+        if (!Server.roomCreated(roomName)) {
+            dataOutputStream.writeUTF("room does not exist");
             return false;
-        } else if (x == ValidationInfo.SUCCESS) {
+        }
+        room = Server.joinRoom(roomName, username, dataOutputStream);
+        if (room == null)
+            dataOutputStream.writeUTF("This username is taken...");
+        else {
             this.username = username;
-            room = Server.joinRoom(roomName, username, this.dataOutputStream);
-            dataOutputStream.writeInt(ValidationInfo.SUCCESS.getValue());
+            dataOutputStream.writeUTF("success");
             room.sendMessage(username, username + " joined to the room");
         }
         return true;

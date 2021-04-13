@@ -1,19 +1,18 @@
 package server;
 
-import enums.ValidationInfo;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 public class Server {
     private static final List<Room> rooms = new ArrayList<>();
 
     public static Room createRoom(String roomName, String username, DataOutputStream creator) {
+        if (roomCreated(roomName))
+            return null;
         Room room = new Room(roomName, username, creator);
         rooms.add(room);
         return room;
@@ -29,35 +28,12 @@ public class Server {
         return null;
     }
 
-
-    public static ValidationInfo validate(String username, String roomName, int option) {
-        int createRoomValue = 1, joinRoomValue = 2;
-
-        if (option == createRoomValue) {//create new room
-            for (Room room : rooms)
-                if (room.getRoomName().equals(roomName))
-                    return ValidationInfo.ROOM_EXISTS;
-        } else if (option == joinRoomValue) {//join to the room
-            boolean flag = false;
-            Room roomFound = null;
-            for (Room room : rooms) {
-                if (room.getRoomName().equals(roomName)) {
-                    flag = true;
-                    roomFound = room;
-                }
-            }
-            if (!flag)
-                return ValidationInfo.ROOM_DOES_NOT_EXIST;
-
-            Map<String, DataOutputStream> usersMap = roomFound.getUsersMap();
-            for (Map.Entry<String, DataOutputStream> entry : usersMap.entrySet()) {
-                if (entry.getKey().equals(username)) {
-                    System.out.println("user exists in this room!");
-                    return ValidationInfo.USER_EXISTS_IN_ROOM;
-                }
-            }
+    public static boolean roomCreated(String roomName) {
+        for (Room room : rooms) {
+            if (room.getRoomName().equals(roomName))
+                return true;
         }
-        return ValidationInfo.SUCCESS;
+        return false;
     }
 
     private void connectWithNewClients(ServerSocket serverSocket) throws IOException {

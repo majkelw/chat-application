@@ -22,14 +22,14 @@ public class Client {
         dataOutputStream.writeUTF(roomName);
     }
 
-    private int askToCreateRoom(String name, String roomName) throws IOException {
+    private String askToCreateRoom(String name, String roomName) throws IOException {
         sendUserRoomInfoToServer(name, roomName);
-        return dataInputStream.readInt();
+        return dataInputStream.readUTF();
     }
 
-    private int askToJoinRoom(String name, String roomName) throws IOException {
+    private String askToJoinRoom(String name, String roomName) throws IOException {
         sendUserRoomInfoToServer(name, roomName);
-        return dataInputStream.readInt();
+        return dataInputStream.readUTF();
     }
 
     private void startConversation() throws IOException {
@@ -70,18 +70,18 @@ public class Client {
             dataOutputStream.writeInt(x);
             if (x == 1) {
 
-                if (askToCreateRoom(name, roomName) == ValidationInfo.ROOM_EXISTS.getValue()) {
+                if (askToCreateRoom(name, roomName).equals("room exists")) {
                     System.out.printf("Room %s already exists...\n", roomName);
                 } else {
                     System.out.printf("Welcome in %s\n", roomName);
                     flag = false;
                 }
             } else {
-                x = askToJoinRoom(name, roomName);
-                if (x == ValidationInfo.ROOM_DOES_NOT_EXIST.getValue())
+                String receivedMessage = askToJoinRoom(name, roomName);
+                if (receivedMessage.equals("room does not exist"))
                     System.out.printf("Room %s does not exist...\n", roomName);
-                else if (x == ValidationInfo.USER_EXISTS_IN_ROOM.getValue())
-                    System.out.printf("Username %s exits in the room...\n", name);
+                else if (receivedMessage.equals("This username is taken..."))
+                    System.out.printf("Username %s is taken...\n", name);
                 else {
                     System.out.printf("Welcome in %s\n", roomName);
                     flag = false;
@@ -103,7 +103,6 @@ public class Client {
             ClientThread clientThread = new ClientThread(input);
             clientThread.start();
             client.startConversation();
-            System.out.println("RYA ");
 
         }
     }

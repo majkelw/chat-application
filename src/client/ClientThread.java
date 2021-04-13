@@ -15,9 +15,9 @@ public class ClientThread extends Thread {
         while (true) {
             try {
                 String message = dataInputStream.readUTF();
-                System.out.println(message);
                 if (message.equals("left"))
                     break;
+                System.out.println(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
