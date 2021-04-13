@@ -43,7 +43,7 @@ public class Client {
     private boolean manageData(int choice, String name, String roomName) throws IOException {
         dataOutputStream.writeInt(choice);
         if (choice == 1) {
-            if (askToCreateRoom(name, roomName).equals("room exists")) {
+            if (askToCreateRoom(name, roomName).equals("Room exists")) {
                 System.out.printf("Room %s already exists...\n", roomName);
             } else {
                 System.out.printf("Welcome in %s\n", roomName);
@@ -51,10 +51,10 @@ public class Client {
             }
         } else {
             String receivedMessage = askToJoinRoom(name, roomName);
-            if (receivedMessage.equals("room does not exist"))
+            if (receivedMessage.equals("Room does not exist"))
                 System.out.printf("Room %s does not exist...\n", roomName);
             else if (receivedMessage.equals("This username is taken..."))
-                System.out.printf("Username %s is taken...\n", name);
+                System.out.printf("Username %s is taken in this room...\n", name);
             else {
                 System.out.printf("Welcome in %s\n", roomName);
                 return true;

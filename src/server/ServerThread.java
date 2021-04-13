@@ -21,18 +21,18 @@ public class ServerThread extends Thread {
     private boolean createRoom(String username, String roomName) throws IOException {
         room = Server.createRoom(roomName, username, dataOutputStream);
         if (room == null) {
-            dataOutputStream.writeUTF("room exists");
+            dataOutputStream.writeUTF("Room exists");
             return false;
         }
         this.username = username;
-        dataOutputStream.writeUTF("success");
+        dataOutputStream.writeUTF("Success");
         return true;
     }
 
     private boolean joinRoom(String username, String roomName) throws IOException {
 
         if (!Server.roomCreated(roomName)) {
-            dataOutputStream.writeUTF("room does not exist");
+            dataOutputStream.writeUTF("Room does not exist");
             return false;
         }
         room = Server.joinRoom(roomName, username, dataOutputStream);
@@ -40,7 +40,7 @@ public class ServerThread extends Thread {
             dataOutputStream.writeUTF("This username is taken...");
         else {
             this.username = username;
-            dataOutputStream.writeUTF("success");
+            dataOutputStream.writeUTF("Success");
             room.sendMessage(username, username + " joined to the room");
         }
         return true;
@@ -57,9 +57,11 @@ public class ServerThread extends Thread {
                 room.sendMessage(username, username + " left the room");
                 room.removeUser(username);
                 dataOutputStream.writeUTF("left");
+                room = null;
+                username = null;
                 flag = false;
-            }
-            room.sendMessage(username, username + " : " + message);
+            } else
+                room.sendMessage(username, username + " : " + message);
         }
     }
 

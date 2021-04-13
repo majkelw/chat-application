@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class Server {
@@ -21,6 +22,11 @@ public class Server {
     public static Room joinRoom(String roomName, String username, DataOutputStream userDataOutputStream) {
         for (Room room : rooms) {
             if (room.getRoomName().equals(roomName)) {
+                Map<String, DataOutputStream> users = room.getUsersMap();
+                for (Map.Entry<String, DataOutputStream> entry : users.entrySet()) {
+                    if (entry.getKey().equals(username))
+                        return null;
+                }
                 room.addUserOutputStream(username, userDataOutputStream);
                 return room;
             }
