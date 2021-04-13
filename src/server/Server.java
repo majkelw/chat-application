@@ -48,11 +48,15 @@ public class Server {
         }
     }
 
-
-    public static void main(String[] args) throws IOException {
-        Server server = new Server();
-        ServerSocket serverSocket = new ServerSocket(60);
-        System.out.println("Server has started working...");
-        server.connectWithNewClients(serverSocket);
+    public static void main(String[] args) {
+        try {
+            Server server = new Server();
+            ServerSocket serverSocket = new ServerSocket(60);
+            System.out.println("Server has started working...");
+            server.connectWithNewClients(serverSocket);
+        } catch (IOException e) {
+            System.out.println("IO Exception");
+            e.printStackTrace();
+        }
     }
 }
